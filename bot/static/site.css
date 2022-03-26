@@ -1,0 +1,29 @@
+
+body {
+  display: flex;
+  justify-content: center;
+}
+
+.wrapper {
+  margin: 40px 40px;
+  display: flex;
+  justify-content: bottom;
+}
+
+.rte {
+  min-height: 20em;
+  max-height: 40em;
+  width: 40em;
+  overflow: auto;
+  margin: 10px;
+  padding: 10px;
+}
+
+button {
+  margin: auto 0 10px 0;
+}
+
+img {
+  max-width: 400px;
+  max-height: 400px;
+}

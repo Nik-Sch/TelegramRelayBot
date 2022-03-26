@@ -1,0 +1,19 @@
+version: '2.0'
+services:
+  bot:
+    build:
+      context: ./
+      dockerfile: bot/Dockerfile-dev
+    container_name: relaybot
+    restart: always
+    volumes:
+      - ./bot:/usr/src/app
+    env_file:
+      env.env
+    networks:
+      - system-proxy_default
+
+
+networks:
+  system-proxy_default:
+    external: true
