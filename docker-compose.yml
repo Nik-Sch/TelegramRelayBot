@@ -6,10 +6,22 @@ services:
     restart: always
     env_file:
       env.env
+    depends_on:
+      - redis
     networks:
       - system-proxy_default
+      - relaybot
+
+  redis:
+    image: redis
+    command: --appendonly yes
+    restart: always
+    networks:
+      - relaybot
 
 
 networks:
+  relaybot:
+    driver: bridge
   system-proxy_default:
     external: true

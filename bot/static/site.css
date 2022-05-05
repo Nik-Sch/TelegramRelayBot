@@ -1,29 +1,55 @@
-
-body {
-  display: flex;
-  justify-content: center;
+.heading {
+  margin: 20px 0;
 }
 
-.wrapper {
-  margin: 40px 40px;
+.send-wrapper {
   display: flex;
   justify-content: bottom;
+  position: relative;
+}
+
+.send-wrapper .file {
+  position: absolute;
+  bottom: 0;
+  margin: 10px;
+}
+
+.no-display {
+  display: none !important;
 }
 
 .rte {
   min-height: 20em;
   max-height: 40em;
-  width: 40em;
   overflow: auto;
-  margin: 10px;
-  padding: 10px;
+  padding: 10px 10px 30px 10px;
+}
+
+.rte.dragover {
+  border: 4px dashed #ccc;
 }
 
 button {
-  margin: auto 0 10px 0;
+  margin: auto 0 0 10px;
 }
 
 img {
   max-width: 400px;
   max-height: 400px;
+}
+
+.message {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+.message .content .text {
+  white-space: pre-wrap;
+}
+.message .date {
+  font-style: italic;
+  flex-shrink: 0;
+  margin-left: 20px;
 }
