@@ -11,6 +11,7 @@ import json
 from pathlib import Path
 from uuid import uuid4
 from werkzeug.utils import secure_filename
+from glob import glob
 
 def raiser(ex): raise ex
 
@@ -35,12 +36,16 @@ class Message(TypedDict):
 
 @bp.route(f'/files/', methods=['POST'])
 def upload_file():
+  Path(FILE_DIRECTORY).mkdir(parents=True, exist_ok=True)
   if 'file' not in request.files:
     return make_response('No file', 400)
   f = request.files['file']
   name = f'{uuid4()}_{secure_filename(f.filename or "")}'
   f.save(f'{FILE_DIRECTORY}/{name}')
-  return make_response(jsonify({'url': f'{request.base_url}{name}'}), 200)
+  return make_response(jsonify({
+    'url': f'{request.base_url}{name}'.replace('http', 'https'),
+    'file_id': name
+    }), 200)
 
 
 
@@ -62,13 +67,8 @@ def get_html(chat_id):
   except Exception as e:
     app.logger.error(e)
     return "<h1>Chat does not exist</h1>"
-  if redisWaitingMessages.exists(chat_id):
-    messages = json.loads(redisWaitingMessages.get(chat_id) or '[]')
-    template = render_template('site.html', chat_id=chat_name, messages=messages)
-    redisWaitingMessages.delete(chat_id)
-    return template
 
-  return render_template('site.html', chat_id=chat_name)
+  return render_template('site.preact.html', chat_id=chat_id, chat_name=chat_name)
 
 @bp.route(f'/messages/<chat_id>', methods=['GET'])
 def messages(chat_id):
@@ -78,18 +78,21 @@ def messages(chat_id):
     return make_response(jsonify(json.loads(result or '[]')), 200)
   return make_response(jsonify([]), 200)
 
-@bp.route(f'/<chat_id>', methods=['POST'])
+@bp.route(f'/messages/<chat_id>', methods=['POST'])
 def send_message(chat_id):
   try:
     data = request.get_json()
     if not data:
       return make_response('no data', 400)
-      
     if 'image' in data and 'file' in data:
-      bot.send_document(chat_id=chat_id, document=data['file'], filename=data['filename'])
+      f = open(f'{FILE_DIRECTORY}/{data["file"]}', 'rb')
+      bot.send_document(chat_id=chat_id, document=f, filename=data['filename'])
       bot.send_photo(chat_id=chat_id, caption=data['text'], photo=b64decode(data['image']))
+      f.close()
     elif 'file' in data:
-      bot.send_document(chat_id=chat_id, document=data['file'], filename=data['filename'], caption=data['text'])
+      f = open(f'{FILE_DIRECTORY}/{data["file"]}', 'rb')
+      bot.send_document(chat_id=chat_id, document=f, filename=data['filename'], caption=data['text'])
+      f.close()
     elif 'image' in data:
       bot.send_photo(chat_id=chat_id, caption=data['text'], photo=b64decode(data['image']))
     elif 'text' in data:
@@ -136,7 +139,7 @@ def respond():
       else:
         addMessage(chat_id, {
           'msg_type': 'text',
-          'date': update.message.date.strftime('%d.%m.%Y %H:%M:%S %Z'),
+          'date': update.message.date.isoformat(),
           'text': text.strip()
         })
     elif update.message.photo != None and len(update.message.photo) > 0:
@@ -145,7 +148,7 @@ def respond():
       filename = create_file(largest_photo.file_id)
       addMessage(chat_id, {
         'msg_type': 'photo',
-        'date': update.message.date.strftime('%d.%m.%Y %H:%M:%S %Z'),
+        'date': update.message.date.isoformat(),
         'text': update.message.caption or '',
         'file_url': f'{HOST}/{URL_PREFIX}/files/{filename}'
       })
@@ -154,7 +157,7 @@ def respond():
       upload_name = create_file(update.message.document.file_id)
       addMessage(chat_id, {
         'msg_type': 'file',
-        'date': update.message.date.strftime('%d.%m.%Y %H:%M:%S %Z'),
+        'date': update.message.date.isoformat(),
         'text': update.message.caption or '',
         'file_url': f'{HOST}/{URL_PREFIX}/files/{upload_name}',
         'file_name': update.message.document.file_name
@@ -166,6 +169,12 @@ def respond():
 @bp.route(f'/webhook', methods=['GET'])
 def activate_webhook():
   bot.setWebhook(f'{HOST}/{URL_PREFIX}/telegram/{BOT_TOKEN}')
+  return 'ok'
+
+@bp.route(f'/delete_files', methods=['GET'])
+def delete_files():
+  for f in glob(f'{FILE_DIRECTORY}/*'):
+    os.remove(f)
   return 'ok'
 
 
