@@ -36,7 +36,7 @@
   border: 4px dashed #ccc;
 }
 
-button {
+.send-wrapper button {
   margin: auto 0 0 10px;
 }
 
@@ -59,4 +59,29 @@ img {
   font-style: italic;
   flex-shrink: 0;
   margin-left: 20px;
+}
+
+.receive-heading {
+  display: flex;
+  align-items: center;
+  /* justify-content: space-between; */
+}
+.receive-heading button {
+  margin: 10px;
+}
+.receive-heading button .bi {
+  margin-right: 3px;
+}
+.receive-heading button .bi.spin::before {
+  animation: Refresh-spin infinite 750ms linear;
+}
+
+
+@keyframes Refresh-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

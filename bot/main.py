@@ -150,7 +150,7 @@ def respond():
         'msg_type': 'photo',
         'date': update.message.date.isoformat(),
         'text': update.message.caption or '',
-        'file_url': f'{HOST}/{URL_PREFIX}/files/{filename}'
+        'file_url': f'/{URL_PREFIX}/files/{filename}'
       })
     elif update.message.document != None:
       app.logger.warning(f'{update.message.document}')
@@ -159,7 +159,7 @@ def respond():
         'msg_type': 'file',
         'date': update.message.date.isoformat(),
         'text': update.message.caption or '',
-        'file_url': f'{HOST}/{URL_PREFIX}/files/{upload_name}',
+        'file_url': f'/{URL_PREFIX}/files/{upload_name}',
         'file_name': update.message.document.file_name
       })
   except Exception as e:
