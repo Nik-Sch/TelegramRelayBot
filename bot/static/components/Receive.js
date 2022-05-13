@@ -26,7 +26,21 @@ export default function Receive(props) {
         console.log(not);
         setNotification(not);
       }
-      setMessages(messages => [...newMessages, ...messages])
+      const formattedMessages = newMessages.map(message => {
+        const matches = [...message.text.matchAll(/(https?:\/\/?)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g)];
+        let text = html``;
+        let length = 0;
+        for (const match of matches) {
+          const url = (match.length > 1) && match[1] ? match[0] : `https://${match[0]}`;
+          text = html`${text}${message.text.substring(length, match.index)}<a href=${url}>${match[0]}</a>`;
+          length += match.index + match[0].length;
+        }
+        return {
+          ...message,
+          text
+        };
+      });
+      setMessages(messages => [...formattedMessages, ...messages])
     } else {
       toasterRef.value.show({
         title: 'Message Fetch Error',
