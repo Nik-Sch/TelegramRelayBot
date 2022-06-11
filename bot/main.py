@@ -99,7 +99,7 @@ def send_message(chat_id):
       bot.send_message(chat_id=chat_id, text=data['text'])
     else:
       return make_response('nothing to send in data', 400)
-      
+
     return make_response('', 200)
   except Exception as e:
     return make_response(str(e), 500)

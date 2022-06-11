@@ -69,7 +69,7 @@ export default function Receive(props) {
 
   useEffect(() => {
     const onKeydown = (e) => {
-      if (e.code === 'KeyR' && !e.ctrlKey) {
+      if (e.code === 'KeyR' && !e.ctrlKey && !e.target.className.includes('rte')) {
         e.preventDefault();
         fetchMessages();
       }
